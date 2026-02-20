@@ -13,7 +13,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["102.210.168.47/32"]
+    cidr_blocks = ["${var.allowed_ssh_ip}/32"]
   }
   egress {
     from_port   = 0
@@ -26,7 +26,7 @@ resource "aws_security_group" "web_sg" {
 
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"
-  description = "Allow MySQL traffic from web servers"
+  description = "Allow MySQL traffic from web servers and SSH traffic from web servers"
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
@@ -35,6 +35,14 @@ resource "aws_security_group" "db_sg" {
     protocol        = "tcp"
     security_groups = [aws_security_group.web_sg.id]
   }
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+
   egress {
     from_port   = 0
     to_port     = 0
